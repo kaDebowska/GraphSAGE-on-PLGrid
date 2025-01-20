@@ -1,0 +1,6 @@
+.venv
+slurm*
+sup-*
+unsup-*
+youtube_data/
+raw_data/
