@@ -19,7 +19,7 @@ def run_regression(train_embeds, train_labels, test_embeds, test_labels):
     from sklearn.multioutput import MultiOutputClassifier
     from sklearn.metrics import f1_score
     
-    dummy = MultiOutputClassifier(DummyClassifier())
+    dummy = MultiOutputClassifier(DummyClassifier(strategy="stratified"))
     dummy.fit(train_embeds, train_labels)
     
     log = MultiOutputClassifier(SGDClassifier(loss="log_loss", class_weight='balanced'), n_jobs=10)

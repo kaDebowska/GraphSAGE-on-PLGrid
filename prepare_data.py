@@ -33,22 +33,8 @@ def prepare_graph_data(graph_file, class_file, output_prefix, feature_file=None)
                     communities[str(node)] = []
                 communities[str(node)].append(idx)
 
-    # Filter classes with fewer than 10 elements
-    class_counts = {}
-    for class_list in communities.values():
-        for cls in class_list:
-            class_counts[cls] = class_counts.get(cls, 0) + 1
-
-    # Keep only classes with at least 10 elements
-    valid_classes = {cls for cls, count in class_counts.items() if count >= 10}
-    filtered_communities = {node: [cls for cls in class_list if cls in valid_classes]
-                            for node, class_list in communities.items()}
-
-    # Remove nodes with no valid classes
-    filtered_communities = {node: class_list for node, class_list in filtered_communities.items() if class_list}
-
     # Filter graph to keep only nodes present in filtered_communities
-    G = G.subgraph([int(node) for node in filtered_communities.keys()])
+    G = G.subgraph([int(node) for node in communities.keys()])
 
     nodes = list(G.nodes())
     random.shuffle(nodes)  
@@ -77,19 +63,18 @@ def prepare_graph_data(graph_file, class_file, output_prefix, feature_file=None)
         feats = np.load(feature_file)
         np.save(os.path.join(output_dir, f'{output_prefix}-feats.npy'), feats)
 
-    all_classes = sorted(valid_classes)
+    all_classes = sorted(list({cls for class_list in communities.values() for cls in class_list}))
     class_to_index = {cls: i for i, cls in enumerate(all_classes)}
     num_classes = len(all_classes)
-    print("Classes number: ", num_classes)
-
+    print("num_classes", num_classes)
     one_hot_communities = {}
-    for node, class_list in filtered_communities.items():
+    for node, class_list in communities.items():
         one_hot_vector = np.zeros(num_classes, dtype=int)
         for cls in class_list:
             one_hot_vector[class_to_index[cls]] = 1
         one_hot_communities[node] = one_hot_vector.tolist()
 
-    with open(os.path.join(output_dir, f'{output_prefix}-class_map.json'), 'w') as f:
+    with open(f'{output_prefix}-class_map.json', 'w') as f:
         json.dump(one_hot_communities, f)
 
 if __name__ == "__main__":
