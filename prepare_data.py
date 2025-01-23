@@ -7,8 +7,7 @@ import argparse
 import os
 
 
-def prepare_graph_data(graph_file, class_file, output_prefix, feature_file=None):
-    output_dir = 'data'
+def prepare_graph_data(graph_file, class_file, output_dir, output_prefix, feature_file=None):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -83,6 +82,7 @@ if __name__ == "__main__":
     parser.add_argument('class_file', type=str, help='Path to the class_file file (gzip compressed).')
     parser.add_argument('output_prefix', type=str, help='Output prefix for the generated files.')
     parser.add_argument('--feature_file', type=str, help='Path to the feature file (optional).')
+    parser.add_argument('output_dir', type=str, help='Path to the output folder.')
 
     args = parser.parse_args()
-    prepare_graph_data(args.graph_file, args.class_file, args.output_prefix, args.feature_file)
+    prepare_graph_data(args.graph_file, args.class_file, args.output_dir, args.output_prefix, args.feature_file)
