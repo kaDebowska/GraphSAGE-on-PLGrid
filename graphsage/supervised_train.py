@@ -7,7 +7,7 @@ import tensorflow.compat.v1 as tf
 import numpy as np
 import sklearn
 from sklearn import metrics
-
+import time
 from graphsage.supervised_models import SupervisedGraphsage
 from graphsage.models import SAGEInfo
 from graphsage.minibatch import NodeMinibatchIterator
@@ -336,9 +336,13 @@ def train(train_data, test_data=None):
 
 def main(argv=None):
     print("Loading training data..")
+    start = time.time()
     train_data = load_data(FLAGS.train_prefix)
     print("Done loading training data..")
     train(train_data)
+    end = time.time()
+    elapsed_time = end - start
+    print(f"Training time: {elapsed_time}")
 
 if __name__ == '__main__':
     tf.app.run()
