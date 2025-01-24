@@ -5,10 +5,9 @@ import json
 import random
 import argparse
 import os
+import time
 
-
-def prepare_graph_data(graph_file, class_file, output_prefix, feature_file=None):
-    output_dir = 'data'
+def prepare_graph_data(graph_file, class_file, output_dir, output_prefix, feature_file=None):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -77,12 +76,19 @@ def prepare_graph_data(graph_file, class_file, output_prefix, feature_file=None)
     with open(os.path.join(output_dir, f'{output_prefix}-class_map.json'), 'w') as f:
         json.dump(one_hot_communities, f)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Prepare data for GraphSAGE.')
     parser.add_argument('graph_file', type=str, help='Path to the graph file (gzip compressed).')
     parser.add_argument('class_file', type=str, help='Path to the class_file file (gzip compressed).')
     parser.add_argument('output_prefix', type=str, help='Output prefix for the generated files.')
     parser.add_argument('--feature_file', type=str, help='Path to the feature file (optional).')
+    parser.add_argument('output_dir', type=str, help='Path to the output folder.')
 
     args = parser.parse_args()
-    prepare_graph_data(args.graph_file, args.class_file, args.output_prefix, args.feature_file)
+    start = time.time()
+    prepare_graph_data(args.graph_file, args.class_file, args.output_dir, args.output_prefix, args.feature_file)
+    
+    end = time.time()
+    elapsed_time = end - start
+    print(f"Data preparation time: {elapsed_time}")

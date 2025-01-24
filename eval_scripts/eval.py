@@ -1,9 +1,13 @@
 from __future__ import print_function
 import json
 import numpy as np
-
+import time
 from networkx.readwrite import json_graph
 from argparse import ArgumentParser
+from sklearn.linear_model import SGDClassifier
+from sklearn.dummy import DummyClassifier
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.metrics import f1_score
 
 ''' To evaluate the embeddings, we run a logistic regression.
 Run this script after running unsupervised training.
@@ -13,16 +17,12 @@ Example:
 '''
 
 def run_regression(train_embeds, train_labels, test_embeds, test_labels):
+    start = time.time()
     np.random.seed(1)
-    from sklearn.linear_model import SGDClassifier
-    from sklearn.dummy import DummyClassifier
-    from sklearn.multioutput import MultiOutputClassifier
-    from sklearn.metrics import f1_score
-    
     dummy = MultiOutputClassifier(DummyClassifier(strategy="stratified"))
     dummy.fit(train_embeds, train_labels)
     
-    log = MultiOutputClassifier(SGDClassifier(loss="log_loss", class_weight='balanced'), n_jobs=10)
+    log = MultiOutputClassifier(SGDClassifier(loss="log_loss", class_weight='balanced'), n_jobs=-1)
     log.fit(train_embeds, train_labels)
 
     pred_labels = log.predict(test_embeds)
@@ -35,9 +35,13 @@ def run_regression(train_embeds, train_labels, test_embeds, test_labels):
     dummy_pred_labels = dummy.predict(test_embeds)
     dummy_avg_f1_micro = f1_score(test_labels, dummy_pred_labels, average="micro", zero_division=0)
     dummy_avg_f1_macro = f1_score(test_labels, dummy_pred_labels, average="macro", zero_division=0)
-    
+
+    end = time.time()
+    elapsed_time = end - start
+
     print(f"Random baseline Average F1 score (micro): {dummy_avg_f1_micro}")
     print(f"Random baseline Average F1 score (macro): {dummy_avg_f1_macro}")
+    print(f"Evaluation time: {elapsed_time}")
 
 if __name__ == '__main__':
     parser = ArgumentParser("Run evaluation.")

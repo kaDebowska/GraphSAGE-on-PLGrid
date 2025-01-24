@@ -400,14 +400,14 @@ class SeqAggregator(Layer):
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.neigh_input_dim = neigh_input_dim
-        self.cell = tf.contrib.rnn.BasicLSTMCell(self.hidden_dim)
+        self.cell = tf.keras.layers.LSTMCell(self.hidden_dim)
 
     def _call(self, inputs):
         self_vecs, neigh_vecs = inputs
 
         dims = tf.shape(neigh_vecs)
         batch_size = dims[0]
-        initial_state = self.cell.zero_state(batch_size, tf.float32)
+        initial_state = self.cell.get_initial_state(batch_size=batch_size, dtype=tf.float32)
         used = tf.sign(tf.reduce_max(tf.abs(neigh_vecs), axis=2))
         length = tf.reduce_sum(used, axis=1)
         length = tf.maximum(length, tf.constant(1.))
@@ -447,4 +447,3 @@ class SeqAggregator(Layer):
             output += self.vars['bias']
        
         return self.act(output)
-

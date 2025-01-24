@@ -383,9 +383,14 @@ def train(train_data, test_data=None):
 def main(argv=None):
     print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
     print("Loading training data..")
+    start = time.time()
     train_data = load_data(FLAGS.train_prefix, load_walks=True)
     print("Done loading training data..")
     train(train_data)
+    end = time.time()
+    elapsed_time = end - start
+    print(f"Training time: {elapsed_time}")
+
 
 if __name__ == '__main__':
     tf.app.run()
