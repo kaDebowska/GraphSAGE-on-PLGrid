@@ -1,4 +1,4 @@
-This repo is based on [GraphSage repo](https://github.com/hacertilbec/GraphSAGE), anewer version of the original [GraphSAGE repo](https://github.com/williamleif/GraphSAGE/), updated for modern Python versions and packages. It includes scripts for batch jobs, enabling the execution of GraphSAGE on the PLGrid GPU cluster. Additionally, we have enhanced the repository's versatility by adding a script to prepare data in the appropriate format for GraphSAGE. A universal evaluation script for unsupervised training has also been included. 
+This repo is based on [GraphSage repo](https://github.com/hacertilbec/GraphSAGE), a newer version of the original [GraphSAGE repo](https://github.com/williamleif/GraphSAGE/), updated for modern Python versions and packages. It includes scripts for batch jobs, enabling the execution of GraphSAGE on the PLGrid GPU cluster. Additionally, we have improved the repository's flexibility by adding scripts to prepare data in the appropriate format for GraphSAGE. A universal evaluation script for unsupervised training has also been included. We have also gathered statistics from training and evaluation. Visualizations of the results can be found in the `statistics` directory.
 
 ## GraphSage: Representation Learning on Large Graphs
 
@@ -22,9 +22,11 @@ See the section on "Running the code" below.
 
 *Note:* GraphSage is intended for use on large graphs (>100,000) nodes. The overhead of subsampling will start to outweigh its benefits on smaller graphs. 
 
-The example_data subdirectory contains a small example of the protein-protein interaction data,
-which includes 3 training graphs + one validation graph and one test graph.
-The full Reddit and PPI datasets (described in the paper) are available on the [project website](http://snap.stanford.edu/graphsage/).
+The repository contains three data directories with data in format reqired by GraphSAGE. These directories were create based on the following datasets:
+
+- [Cora Dataset](https://github.com/williamleif/graphsage-simple/tree/master/cora)
+- [Facebook Large Page-Page Network](http://snap.stanford.edu/data/facebook-large-page-page-network.html)
+- [Amazon product co-purchasing network](https://snap.stanford.edu/data/com-Amazon.html)
 
 If you make use of this code or the GraphSage algorithm in your work, please cite the following paper:
 
@@ -41,39 +43,44 @@ Recent versions of TensorFlow, numpy, scipy, sklearn, and networkx are required 
 
 	$ pip install -r requirements.txt
 
-To guarantee that you have the right package versions, you can use [docker](https://docs.docker.com/) to easily set up a virtual environment. See the Docker subsection below for more info.
-
-#### Docker
-
-If you do not have [docker](https://docs.docker.com/) installed, you will need to do so. (Just click on the preceding link, the installation is pretty painless).  
-
-You can run GraphSage inside a [docker](https://docs.docker.com/) image. After cloning the project, build and run the image as following:
-
-	$ docker build -t graphsage .
-	$ docker run -it graphsage bash
-
-or start a Jupyter Notebook instead of bash:
-
-	$ docker run -it -p 8888:8888 graphsage
-
-You can also run the GPU image using [nvidia-docker](https://github.com/NVIDIA/nvidia-docker):
-
-	$ docker build -t graphsage:gpu -f Dockerfile.gpu .
-	$ nvidia-docker run -it graphsage:gpu bash	
 
 ### Running the code
 
-The example_unsupervised.sh and example_supervised.sh files contain example usages of the code, which use the unsupervised and supervised variants of GraphSage, respectively.
+The unsupervised.sh and supervised.sh files contain example batch jobs that enable running the unsupervised and supervised variants of GraphSage on the PLGrid GPU cluster. These scripts require passing appropriate parameters. 
+
+For unsupervised.sh:
+- train_prefix,
+- model,
+- identity_dim,
+- max_total_steps,
+- validate_iter
+
+Example usage:
+
+```bash
+sbatch unsupervised.sh ./facebook_data/facebook graphsage_mean 128 1000 10
+```
+
+For supervised.sh:
+- train_prefix,
+- model,
+- identity_dim,
+- sigmoid_flag,
+
+
+Example usage:
+
+```bash
+sbatch supervised.sh ./cora_data/cora graphsage_mean 128 true
+```
 
 If your benchmark/task does not require generalizing to unseen data, we recommend you try setting the "--identity_dim" flag to a value in the range [64,256].
 This flag will make the model embed unique node ids as attributes, which will increase the runtime and number of parameters but also potentially increase the performance.
 Note that you should set this flag and *not* try to pass dense one-hot vectors as features (due to sparsity).
 The "dimension" of identity features specifies how many parameters there are per node in the sparse identity-feature lookup table.
 
-Note that example_unsupervised.sh sets a very small max iteration number, which can be increased to improve performance.
-We generally found that performance continued to improve even after the loss was very near convergence (i.e., even when the loss was decreasing at a very slow rate).
 
-*Note:* For the PPI data, and any other multi-ouput dataset that allows individual nodes to belong to multiple classes, it is necessary to set the `--sigmoid` flag during supervised training. By default the model assumes that the dataset is in the "one-hot" categorical setting.
+*Note:* For any multi-ouput dataset that allows individual nodes to belong to multiple classes, it is necessary to set the `--sigmoid` flag during supervised training. By default the model assumes that the dataset is in the "one-hot" categorical setting.
 
 
 #### Input format
