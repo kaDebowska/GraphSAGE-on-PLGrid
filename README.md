@@ -71,7 +71,7 @@ For supervised.sh:
 Example usage:
 
 ```bash
-sbatch supervised.sh ./cora_data/cora graphsage_mean 128 true
+sbatch supervised.sh ./cora_data/cora graphsage_mean 128 false
 ```
 
 If your benchmark/task does not require generalizing to unseen data, we recommend you try setting the "--identity_dim" flag to a value in the range [64,256].
